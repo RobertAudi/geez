@@ -1,6 +1,12 @@
 # Clone a git repo
 
 geez-get() {
+  local opt_force
+  opt_force=()
+
+  zparseopts -K -D -E f=opt_force -force=opt_force
+  local force=${#opt_force}
+
   local repo
 
   if (( $# == 0 )); then
@@ -28,8 +34,12 @@ geez-get() {
   local repodir="$GEEZ_REPOS_PATH/${${repo#*github.com(/|:)}%.git}"
 
   if [[ -d "$repodir" ]]; then
-    echo "$fg[red]You already cloned this repo!$reset_color"
-    return 1
+    if (( $force == 0 )); then
+      echo "$fg[red]You already cloned this repo!$reset_color"
+      return 1
+    else
+      command rm -rf $repodir
+    fi
   fi
 
   command git clone --recursive $repo $repodir > /dev/null 2>&1
